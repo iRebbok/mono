@@ -75,7 +75,7 @@ namespace System.Net
 
 					Uri uri = new Uri (address);
 					IPAddress ip;
-					
+
 					if (IPAddress.TryParse (uri.Host, out ip)) {
 						if (IPAddress.Any.Equals (ip)) {
 							UriBuilder builder = new UriBuilder (uri);
@@ -91,10 +91,10 @@ namespace System.Net
 					bool bBypassOnLocal = false;
 					ArrayList al = new ArrayList ();
 					string bypass = Environment.GetEnvironmentVariable ("no_proxy") ?? Environment.GetEnvironmentVariable ("NO_PROXY");
-					
+
 					if (bypass != null) {
 						string[] bypassList = bypass.Split (new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
-					
+
 						foreach (string str in bypassList) {
 							if (str != "*.local")
 								al.Add (str);
@@ -119,7 +119,7 @@ namespace System.Net
 		{
 			return (int) Environment.OSVersion.Platform < 4;
 		}
-				
+
 		WebProxyData InitializeRegistryGlobalProxy ()
 		{
 			int iProxyEnable = (int)Microsoft.Win32.Registry.GetValue ("HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Internet Settings", "ProxyEnable", 0);
@@ -128,10 +128,14 @@ namespace System.Net
 				string strHttpProxy = "";
 				bool bBypassOnLocal = false;
 				ArrayList al = new ArrayList ();
-				
+
 				string strProxyServer = (string)Microsoft.Win32.Registry.GetValue ("HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Internet Settings", "ProxyServer", null);
 				string strProxyOverrride = (string)Microsoft.Win32.Registry.GetValue ("HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Internet Settings", "ProxyOverride", null);
-				
+
+				if(strProxyServer == null) {
+					return null;
+				}
+
 				if (strProxyServer.Contains ("=")) {
 					foreach (string strEntry in strProxyServer.Split (new char[] { ';' }, StringSplitOptions.RemoveEmptyEntries))
 						if (strEntry.StartsWith ("http=")) {
@@ -139,10 +143,10 @@ namespace System.Net
 							break;
 						}
 				} else strHttpProxy = strProxyServer;
-				
+
 				if (strProxyOverrride != null) {
 					string[] bypassList = strProxyOverrride.Split (new char[] { ';' }, StringSplitOptions.RemoveEmptyEntries);
-				
+
 					foreach (string str in bypassList) {
 						if (str != "<local>")
 							al.Add (str);
@@ -165,8 +169,8 @@ namespace System.Net
 		{
 			if (address == null)
 				return null;
-				
-			if (address.IndexOf ("://", StringComparison.Ordinal) == -1) 
+
+			if (address.IndexOf ("://", StringComparison.Ordinal) == -1)
 				address = "http://" + address;
 
 			return new Uri (address);
